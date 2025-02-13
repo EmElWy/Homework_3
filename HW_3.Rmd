@@ -1,0 +1,264 @@
+---
+title: "HW_3"
+author: "Emily Wygal"
+date: "2025-02-05"
+output:
+  pdf_document:
+  html_document:
+---
+
+Name: Emily Wygal UT EID: eew2267 Github link: <https://github.com/EmElWy/Homework_3>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+#necessary packages
+library(ggplot2)
+library(tidyverse)
+library(mosaic)
+```
+
+## Homework 3
+
+### **Problem 1**
+
+##### *Part A*
+
+**Claim:** Gas stations charge more if they lack direct competition in sight.
+
+**Evidence:** After conducting a bootstrap sample of the difference in mean price of gas stations that have direct competitors and those that don't, I found a 95% confidence interval of -0.055 to 0.007. Since the interval contains 0, I am 95% confident that gas stations don't charge more if they lack direct competition in sight.
+
+```{r, echo=FALSE, message=FALSE}
+#imports the data onto r
+gasprices <- read.csv("gasprices.csv")
+
+#takes bootstrap sample for the difference of means
+boot_gasprices = do(10000)*diffmean(Price~Competitors, data=resample(gasprices))
+
+#calculates a 95% confidence interval
+confint(boot_gasprices, level=0.95)
+
+ggplot(boot_gasprices) + geom_histogram(aes(x=diffmean)) + labs(title="Difference of Means for Price According to the Presence of Competition", x='Difference of Means',y='Count')
+```
+
+**Conclusion:** I am 95% confident that gas stations do not charge more if they lack direct competition in sight.
+
+##### *Part B*
+
+**Claim:** The richer the area, the higher the gas prices.
+
+**Evidence:** I conducted a bootstrap sample of the correlation between price of gas and the average income of the surrounding area. I found a 95% confidence interval of 0.196 to 0.568, so I am 95% confident that correlation between price of gas and the average income of the surrounding area is between 0.196 and 0.568.
+
+```{r, echo=FALSE}
+
+#takes bootstrap sample for the difference of means
+boot_gasprice_rich = do(10000)*cor(Price~Income, data=resample(gasprices))
+
+#calculates a 95% confidence interval
+confint(boot_gasprice_rich, level=0.95)
+
+```
+
+**Conclusion:** I am 95% confident that correlation between price of gas and the average income of the surrounding area is between 0.196 and 0.568, so I am 95% confident that gas stations charge more if they are in richer areas.
+
+##### *Part C*
+
+**Claim:** Gas stations at stoplights charge more.
+
+**Evidence:** After conducting a bootstrap sample of the difference in mean price of gas stations at stoplights and those that aren't, I found a 95% confidence interval of -0.038 to 0.031. Since the interval contains 0, I am 95% confident that gas stations don't charge more if they are at a stoplight.
+
+```{r, echo=FALSE, message=FALSE}
+
+#takes bootstrap sample for the difference of means
+boot_stoplight = do(10000)*diffmean(Price~Stoplight, data=resample(gasprices))
+
+#calculates a 95% confidence interval
+confint(boot_stoplight, level=0.95)
+
+ggplot(boot_stoplight) + geom_histogram(aes(x=diffmean)) + labs(title="Difference of Means for Price According to the Presence of Stoplights", x='Difference of Means',y='Count')
+```
+
+**Conclusion:** I am 95% confident that gas stations don't charge more if they are at a stoplight.
+
+##### *Part D*
+
+**Claim:** Gas stations with direct highway access charge more.
+
+**Evidence:** After conducting a bootstrap sample of the difference in mean price of gas stations with direct highway access and those that don't, I found a 95% confidence interval of 0.010 to 0.081. Since the interval doesn't contain 0, I am 95% confident that gas stations charge more if they have direct highway access.
+
+```{r, echo=FALSE, message=FALSE}
+
+#takes bootstrap sample for the difference of means
+boot_highway = do(10000)*diffmean(Price~Highway, data=resample(gasprices))
+
+#calculates a 95% confidence interval
+confint(boot_highway, level=0.95)
+
+ggplot(boot_highway) + geom_histogram(aes(x=diffmean)) + labs(title="Difference of Means for Price According to Highway Access", x='Difference of Means',y='Count')
+```
+
+**Conclusion:** I am 95% confident that gas stations charge more if they have direct highway access.
+
+##### *Part E*
+
+**Claim:** Shell charges more than all other non-Shell brands
+
+**Evidence:** After conducting a bootstrap sample of the difference in mean price of Shell gas stations and other brand gas stations, I found a 95% confidence interval of -0.010 to 0.065. Since the interval contains 0, I am 95% confident that Shell gas stations don't charge more than other gas stations.
+
+```{r, echo=FALSE, message=FALSE, results='hide'}
+gasprice_shell = gasprices %>%
+  mutate(isShell = ifelse(Brand == "Shell", #variable of if the gas sation is Shell brand or not
+                              yes="TRUE", no="FALSE"))
+
+#takes bootstrap sample for the difference of means
+boot_gasprice_shell = do(10000)*diffmean(Price~isShell, data=resample(gasprice_shell))
+
+#calculates a 95% confidence interval
+confint(boot_gasprice_shell, level=0.95)
+
+```
+
+**Conclusion:** I am 95% confident that Shell gas stations don't charge more than other gas stations.
+
+### **Problem 2**
+
+##### *Part A*
+
+I found a 95% bootstrap confidence interval for the average mileage of 2011 S-Class 63 AMGs that were hitting the used-car market when this data was collected of 26956.3 and 34714.4 miles. I am 95% confident that the average mileage of 2011 S-Class 63 AMGs that were hitting the used-car market when this data was collected is between 26956.3 and 34714.4 miles.
+```{r, echo=FALSE, results='hide'}
+#imports the data onto r
+sclass <- read.csv("sclass.csv")
+
+#filters sclass to only cars from 2011 with a 63 AMG trim
+sclass2011 = sclass %>%
+  filter(year == 2011) %>%
+  filter(trim == "63 AMG")
+
+#takes bootstrap sample for the mean
+boot_sclass2011 = do(10000)*mean(~mileage, data=resample(filter(sclass2011, condition == "Used")))
+
+#calculates a 95% confidence interval
+confint(boot_sclass2011, level=0.95)
+
+```
+
+##### *Part B*
+
+I found a 95% bootstrap confidence interval for the proportion of all 2014 S-Class 550s that were painted black of 0.417 to 0.453. I am 95% confident that the proportion of all 2014 S-Class 550s that were painted black is between 0.417 and 0.453.
+```{r, echo=FALSE, results='hide'}
+
+#filters sclass to only cars from 2011 with a 63 AMG trim
+sclass2014 = sclass %>%
+  filter(year == 2014) %>%
+  filter(trim == "550") %>%
+  mutate(isBlack = ifelse(color == "Black", #variable of whether the color of the car was black
+                              yes="TRUE", no="FALSE"))
+
+#takes bootstrap sample for the proportion
+boot_sclass2014 = do(10000)*prop(~isBlack, data=resample(sclass2014))
+
+#calculates a 95% confidence interval
+confint(boot_sclass2014, level=0.95)
+
+```
+
+### **Problem 3**
+
+##### *Part A*
+
+```{r, echo=FALSE, results='hide'}
+#imports the data onto r
+nbcpilot <- read.csv("nbc_pilotsurvey.csv")
+
+#filters nbcpilot to only respondents from "My Name is Earl" and "Living with Ed"
+happypilot = nbcpilot %>%
+  filter(Show == "My Name is Earl"|Show == "Living with Ed")
+
+#takes bootstrap sample for the difference of means
+boot_pilot_happy = do(10000)*diffmean(Q1_Happy~Show, data=resample(happypilot))
+
+#calculates a 95% confidence interval
+confint(boot_pilot_happy, level=0.95)
+```
+
+**Question:** Who makes people happier: Ed or Earl?
+
+**Approach:** In order to answer the question, we filtered the data so that only responses for "My Name is Earl" and "Living with Ed" were shown. Then we took a bootstrap sample of the data and found the difference in mean. We did this 10000 times, and then calculated the 95% confidence interval for the difference in mean Q1_Happy responses for the two shows.
+
+**Results:** We calculated a 95% confidence interval from -0.395 to 0.097.
+
+**Conclusion:** Since the confidence interval for the mean difference contains zero, we can say with 95% confidence that one show does not consistently produces a higher mean Q1_Happy response among viewers than the other.
+
+##### *Part B*
+
+```{r, echo=FALSE, results='hide'}
+
+#filters nbcpilot to only "The Biggest Loser" and "The Apprentice: Los Angeles"
+annoyedpilot = nbcpilot %>%
+  filter(Show == "The Biggest Loser"|Show == "The Apprentice: Los Angeles")
+
+#takes bootstrap sample for the difference of means
+boot_pilot_annoy = do(10000)*diffmean(Q1_Annoyed~Show, data=resample(annoyedpilot))
+
+#calculates a 95% confidence interval
+confint(boot_pilot_annoy, level=0.95)
+```
+
+**Question:** Which reality/contest show made people feel more annoyed?
+
+**Approach:** In order to answer the question, we filtered the data so that only responses for "The Biggest Loser" and "The Apprentice: Los Angeles" were shown. Then we took a bootstrap sample of the data and found the difference in mean. We did this 10000 times, and then calculated the 95% confidence interval for the difference in mean Q1_Annoyed responses for the two shows.
+
+**Results:** We calculated a 95% confidence interval from -0.521 to -0.015. The interval does not contain zero.
+
+**Conclusion:** Since the confidence interval for the mean difference does not contain zero, we can say with 95% confidence that one show does consistently produces a higher mean Q1_Annoyed response among viewers than the other.
+
+##### *Part C*
+
+```{r, echo=FALSE, results='hide'}
+
+#filters nbcpilot to only Dancing with the stars respondents
+DWTS = nbcpilot %>%
+  filter(Show == "Dancing with the Stars") %>%
+   mutate(confusing = ifelse(Q2_Confusing %in% c(4, 5),#variable of whether the person thought it was confusing or not
+                             yes="TRUE", no="FALSE"))
+
+#takes bootstrap sample for the proportion of people who thought it was confusing
+boot_DWTS = do(10000)*prop(~confusing, data=resample(DWTS))
+
+# calculates a 95% confidence interval
+confint(boot_DWTS, level=0.95)
+
+```
+
+**Question:** Do Americans feel confused watching Dancing With the Stars?
+
+**Approach:** In order to answer the question, we filtered the data so that only responses for "Dancing with the Stars" were shown. Then we took a bootstrap sample of the data and found the proportion of respondents who put a 4 or 5 under Q2_Confusing. We did this 10000 times, and then calculated the 95% confidence interval for the proportion of respondents who put a 4 or 5 under Q2_Confusing.
+
+**Results:** We calculated a 95% confidence interval from 0.039 to 0.122.
+
+**Conclusion:** According to our bootstrap sample we can say with 95% confidence that the proportion of people who find Dancing with the Stars confusing is between 3.9% and 12.2%.
+
+### **Problem 4**
+
+**Question:** Was EBay’s paid advertising on Google’s search platform improving EBay’s revenue?
+
+**Approach:** In order to answer the question, we mutated the data to create a new variable, revenue ratio. We then took a bootstrap sample of the revenue ratios according whether there was a pause in advertising. Using the bootstrap sample of the data we found the difference of means of revenue ratio between when the advertising was paused and when it wasn't. We did this 10000 times, and then calculated the 95% confidence interval for the difference of means of revenue ratio between when the advertising was paused and when it wasn't.
+
+```{r, echo=FALSE, results='hide'}
+#imports the data onto r
+ebay <- read.csv("ebay.csv")
+
+#mutates new variable in ebay
+ebay_ratio = ebay %>%
+   mutate(revenue_ratio = rev_after / rev_before)
+
+#takes bootstrap sample for the proportion of people who thought it was confusing
+boot_ebay = do(10000)*diffmean(revenue_ratio~adwords_pause, data=resample(ebay_ratio))
+
+# calculates a 95% confidence interval
+confint(boot_ebay, level=0.95)
+
+```
+
+**Results:** We calculated a 95% confidence interval from -0.091 to -0.014. The interval does not contain zero.
+
+**Conclusion:** According to our bootstrap sample we can say with 95% confidence that EBay’s paid advertising on Google’s search platform improved EBay’s revenue.
